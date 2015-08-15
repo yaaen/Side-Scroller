@@ -3,6 +3,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import javax.swing.event.*;
 import java.util.*;
+import java.io.*;
 
 public class LevelCreator extends JPanel implements ActionListener, MouseListener, MouseMotionListener, ChangeListener{
 	private JFrame frame = new JFrame();
@@ -18,6 +19,7 @@ public class LevelCreator extends JPanel implements ActionListener, MouseListene
 	private JSlider blue = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
 	private JSlider green = new JSlider(JSlider.HORIZONTAL, 0, 255, 0);
 	private int redVal = 0, greenVal = 0, blueVal = 0;
+	private JButton saveBut = new JButton("Save");
 
 	public LevelCreator() {
 		// pane.setLayout(new BorderLayout());
@@ -42,15 +44,16 @@ public class LevelCreator extends JPanel implements ActionListener, MouseListene
 		red.addChangeListener(this);
 		blue.addChangeListener(this);
 		green.addChangeListener(this);
-
+		saveBut.addActionListener(this);
 
 		canvas = frame.getContentPane();
 		canvas.add(pane, BorderLayout.SOUTH);
 		canvas.add(this, BorderLayout.CENTER);
+		canvas.add(saveBut, BorderLayout.NORTH);
 		setPreferredSize(new Dimension(1200, 400));
 		setBackground(Color.WHITE);
-		canvas.addMouseListener(this);
-		canvas.addMouseMotionListener(this);
+		addMouseListener(this);
+		addMouseMotionListener(this);
 		frame.pack();
 		frame.setResizable(false);
 		frame.setVisible(true);
@@ -74,15 +77,41 @@ public class LevelCreator extends JPanel implements ActionListener, MouseListene
 		}
 		g.setColor(new Color(redVal, greenVal, blueVal));
 		if (dragging) {
-			g.fillRect(x, y, dragX - x, dragY - y);
-			g.setColor(Color.BLACK);
-			g.drawRect(x, y, dragX - x, dragY - y);
+			if (x > dragX) {
+				if (y > dragY) {
+					g.fillRect(dragX, dragY, x - dragX, y - dragY);
+					g.setColor(Color.BLACK);
+					g.drawRect(dragX, dragY, x - dragX, y - dragY);
+				}
+				else {
+					g.fillRect(dragX, y, x - dragX, dragY - y);
+					g.setColor(Color.BLACK);
+					g.drawRect(dragX, y, x - dragX, dragY - y);
+				}
+			}
+			else {
+				if (y > dragY) {
+					g.fillRect(x, dragY, dragX - x, y - dragY);
+					g.setColor(Color.BLACK);
+					g.drawRect(x, dragY, dragX - x, y - dragY);
+				}
+				else {
+					g.fillRect(x, y, dragX - x, dragY - y);
+					g.setColor(Color.BLACK);
+					g.drawRect(x, y, dragX - x, dragY - y);
+				}
+			}
 		}
 		g.setColor(new Color(redVal, greenVal, blueVal));
 		g.fillOval(10, 310, 80, 80);
 		// frame.repaint();
 	}
-	public void actionPerformed(ActionEvent a){}
+	public void actionPerformed(ActionEvent a){
+		Object input = a.getSource();
+		if (input.equals(saveBut)) {
+			save("Level1.txt");
+		}
+	}
 	public void mouseClicked(MouseEvent m){
 		x = m.getX();
 		y = m.getY();
@@ -96,7 +125,18 @@ public class LevelCreator extends JPanel implements ActionListener, MouseListene
 		int rY = (int)(Math.floor(y / 10.0) * 10);
 		int rBX = (int)(Math.ceil(dragX / 10.0) * 10);
 		int rBY = (int)(Math.ceil(dragY / 10.0) * 10);
-		System.out.println(rX + " " + rY);
+		// System.out.println(rX + " " + rY);
+		if (rX > rBX) {
+			int temp = rX;
+			rX = rBX;
+			rBX = temp;
+		}
+		if (rY > rBY) {
+			int temp = rY;
+			rY = rBY;
+			rBY = temp;
+		}
+
 		level.add(new Ledge(rX, rY, rBX - rX, rBY - rY, redVal, greenVal, blueVal));
 		// System.out.println(level.size());
 		x = 0;
@@ -133,6 +173,26 @@ public class LevelCreator extends JPanel implements ActionListener, MouseListene
 			greenVal = green.getValue();
 		}
 		frame.repaint();
+	}
+
+	private void save(String path) {
+		BufferedWriter writer = null;
+		try {
+			File logFile = new File(path);
+			writer = new BufferedWriter(new FileWriter(logFile));
+			for (int i = 0; i < level.size(); i++) {
+				writer.write(level.get(i).toString());
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			try {
+				writer.close();
+			}
+			catch (Exception e) {}
+		}
 	}
 
 	public static void main(String[] args) {

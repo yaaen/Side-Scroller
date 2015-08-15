@@ -21,4 +21,8 @@ public class Ledge {
 		g.drawRect(x, y, width, height);
 		// System.out.println(x + " " + y + " " + width + " " + height);
 	}
+
+	public String toString() {
+		return x + "\n" + y + "\n" + width + "\n" + height + "\n" + red + "\n" + green + "\n" + blue + "\n\n";
+	}
 }
