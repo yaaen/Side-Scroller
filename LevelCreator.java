@@ -109,7 +109,17 @@ public class LevelCreator extends JPanel implements ActionListener, MouseListene
 	public void actionPerformed(ActionEvent a){
 		Object input = a.getSource();
 		if (input.equals(saveBut)) {
-			save("Level1.txt");
+			String things;
+			boolean cont = true;
+			boolean contin = true;
+			while(cont) {
+				cont = false;
+				things = (String)JOptionPane.showInputDialog("Enter the name of the save file");
+				if (things != null) {
+					things += ".txt";
+					save(things);
+				}					
+			}
 		}
 	}
 	public void mouseClicked(MouseEvent m){
@@ -180,6 +190,7 @@ public class LevelCreator extends JPanel implements ActionListener, MouseListene
 		try {
 			File logFile = new File(path);
 			writer = new BufferedWriter(new FileWriter(logFile));
+			writer.write(level.size() + "\n");
 			for (int i = 0; i < level.size(); i++) {
 				writer.write(level.get(i).toString());
 			}
